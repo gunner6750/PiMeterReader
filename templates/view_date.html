@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .image-info {
+            margin-left: 300px;
+            text-align: center; /* Center text horizontally */
+            display: flex;      /* Use flexbox for vertical centering */
+            flex-direction: column;  /* Stack label and time vertically */
+            justify-content: center; /* Center vertically */
+            align-items: center; /* Center horizontally */
+            height: 100%;  /* Ensure the container takes up the full height */
+        }
+        .image-card {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+            position: relative;
+        }
+        .image-card img {
+            width: 400px;
+            height: auto;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        /* Magnifying Glass Effect */
+        .magnifier {
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid #007bff;
+            background-color: rgba(255, 255, 255, 0.7);
+            cursor: zoom-in;
+            display: none;
+            pointer-events: none;
+        }
+
+        .image-card:hover .magnifier {
+            display: block;
+        }
+
+        .back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            position: absolute;
+            right: 20px;
+            top: 20px;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="filter-form">
+        <form method="POST">
+            <label>
+                <input type="checkbox" name="with_label" {% if show_with_label %}checked{% else %}checked{% endif %}>
+                Show only images with labels
+            </label>
+            <button type="submit">Filter</button>
+        </form>
+    </div>
+
+    <a href="{{ url_for('index') }}">
+        <button class="back-button">Back to Date Selection</button>
+    </a>
+
+    <div>
+        {% for image in images %}
+            <div class="image-card">
+                <img src="{{ url_for('serve_image', filename=image['image']) }}" alt="Processed Image" class="zoomed-image">
+                <div class="magnifier" id="magnifier-{{ loop.index }}"></div> <!-- Magnifier glass -->
+                <div class="image-info">
+                    <p class="label">Label: {{ image['label'] }}</p>
+                    <p class="time">Processed: {{ image['modified_time'].strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // Handle magnifier movement and mouse scroll zoom
+        document.querySelectorAll('.image-card').forEach((card, index) => {
+            const image = card.querySelector('.zoomed-image');
+            const magnifier = card.querySelector('.magnifier');
+
+            let zoomLevel = 1; // Default zoom level
+            const zoomFactor = 0.1; // Zoom factor for scrolling
+
+            // Function to move magnifier
+            card.addEventListener('mousemove', function(event) {
+                const rect = image.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+
+                // Move the magnifier with the mouse
+                magnifier.style.left = `${x - magnifier.offsetWidth / 2}px`;
+                magnifier.style.top = `${y - magnifier.offsetHeight / 2}px`;
+
+                // Update background position of the magnifier for zoom
+                magnifier.style.backgroundImage = `url('${image.src}')`;
+                magnifier.style.backgroundSize = `${image.width * 2}px ${image.height * 2}px`;
+                magnifier.style.backgroundPosition = `-${x * 2 - magnifier.offsetWidth / 2}px -${y * 2 - magnifier.offsetHeight / 2}px`;
+            });
+
+            // Scroll to zoom
+            image.addEventListener('wheel', function(event) {
+                event.preventDefault(); // Prevent page scrolling
+
+                // Zoom in or out
+                if (event.deltaY < 0) {
+                    zoomLevel += zoomFactor; // Zoom in
+                } else {
+                    zoomLevel -= zoomFactor; // Zoom out
+                }
+
+                // Ensure the zoom level stays within a reasonable range
+                zoomLevel = Math.max(1, Math.min(zoomLevel, 3));
+
+                // Apply zoom effect to the image
+                image.style.transform = `scale(${zoomLevel})`;
+            });
+        });
+    </script>
+</body>
+</html>
