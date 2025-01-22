@@ -80,12 +80,15 @@ Alternatively, you can run the script manually:
 ---
 
 ## Usage
-1. Connect all devices to the same Wi-Fi as the Raspberry Pi.
-2. Access the web interface by navigating to the Raspberry Pi's IP address in a browser:
+1. I've included a set of 100 test images in the dataset to help you test the model manually.To test the model:
+   - run the script.py file
+   - Once the script is running, you will be prompted to input the name of the image file you wish to test. For example: meter1920.jpg
+2. Connect all devices to the same Wi-Fi as the Raspberry Pi.
+3. Access the web interface by navigating to the Raspberry Pi's IP address in a browser:
    ```
    http://<raspberry_pi_ip>:5000
    ```
-3. View and analyze the processed meter readings.
+4. View and analyze the processed meter readings.
 
 ---
 
